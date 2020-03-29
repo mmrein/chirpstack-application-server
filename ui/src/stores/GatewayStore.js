@@ -95,11 +95,11 @@ class GatewayStore extends EventEmitter {
     });
   }
 
-  getStats(gatewayID, start, end, callbackFunc) {
+  getStats(gatewayID, interval, start, end, callbackFunc) {
     this.swagger.then(client => {
       client.apis.GatewayService.GetStats({
         gateway_id: gatewayID,
-        interval: "DAY",
+        interval: interval,
         startTimestamp: start,
         endTimestamp: end,
       })

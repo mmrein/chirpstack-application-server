@@ -40,8 +40,9 @@ class GatewayRow extends Component {
   componentDidMount() {
     const start = moment().subtract(29, "days").toISOString();
     const end = moment().toISOString();
+    const interval = "DAY";
 
-    GatewayStore.getStats(this.props.gateway.id, start, end, resp => {
+    GatewayStore.getStats(this.props.gateway.id, interval, start, end, resp => {
       let stats = {
         labels: [],
         datasets: [
