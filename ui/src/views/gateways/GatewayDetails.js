@@ -26,12 +26,18 @@ const styles = {
 class GatewayDetails extends Component {
   constructor() {
     super();
-    this.state = {};
+    this.state = {
+      statsUp: [],
+      statsDown: [],
+      statusGw: []
+    };
     this.loadStats = this.loadStats.bind(this);
+    this.loadStatus = this.loadStatus.bind(this);
   }
 
   componentDidMount() {
     this.loadStats();
+    this.loadStatus();
   }
 
   loadStats() {
@@ -82,8 +88,51 @@ class GatewayDetails extends Component {
     });
   }
 
+  // Load stats with MINUTE interval for last 2 hours (actual data adjustable in app-server.toml) and create graph for it. 
+  // TODO:
+  //	- Data should be drawed for like each 5 minutes, not for every minute. 
+  // 	- What data to count? Stats are sored in redis as RX/TX counters per minute.
+  // 	   	Idealy we sould be able to distinct between something like "stats present" X "stats not present", but that
+  //		is not implemented currently - non existent stats are returned as zeroed counters, but are present.
+  //	  -> Seems like we could ideally add new value to Stats struct which can count how many statuses has actually been received from gateway
+  //    -> Temporary workaround is to check if any of counters are not zero.
+  loadStatus() {
+    const end = moment().toISOString()
+    const start = moment().subtract(2, "hours").toISOString()
+    const interval = "MINUTE"
+    
+    GatewayStore.getStats(this.props.match.params.gatewayID, interval, start, end, resp => {
+      let statusGw = {
+        labels: [],
+        datasets: [
+          {
+            label: "status",
+            borderColor: "rgba(33, 150, 243, 1)",
+            backgroundColor: "rgba(0, 0, 0, 0)",
+            lineTension: 0,
+            pointBackgroundColor: "rgba(33, 150, 243, 1)",
+            data: [],
+          },
+        ],
+      }
+      for (const row of resp.result) {
+        statusGw.labels.push(moment(row.timestamp).format("h:mm"));
+        if ((row.rxPacketsReceived + row.rxPacketsReceivedOK + row.txPacketsReceived + row.txPacketsEmitted) > 0) {
+          statusGw.datasets[0].data.push(1);	
+        } else {
+          statusGw.datasets[0].data.push(0);	
+        }
+        
+		// Just a debug values so far, has to be something else
+      }
+      this.setState({
+        statusGw: statusGw
+      });
+    });
+  }
+
   render() {
-    if (this.props.gateway === undefined || this.state.statsDown === undefined || this.state.statsUp === undefined) {
+    if (this.props.gateway === undefined || this.state.statsDown === undefined || this.state.statsUp === undefined || this.state.statusGw === undefined) {
       return(<div></div>);
     }
 
@@ -159,6 +208,14 @@ class GatewayDetails extends Component {
               <Marker position={position} />
             </Map>
           </Paper>
+        </Grid>
+		<Grid item xs={12}>
+          <Card>
+            <CardHeader title="Gateway status" />
+            <CardContent className={this.props.classes.chart}>
+              <Line height={75} options={statsOptions} data={this.state.statusGw} redraw />
+            </CardContent>
+          </Card>
         </Grid>
         <Grid item xs={12}>
           <Card>
