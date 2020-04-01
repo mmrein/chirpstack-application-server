@@ -9,6 +9,7 @@ import Typography from "@material-ui/core/Typography";
 import Grid from '@material-ui/core/Grid';
 
 import moment from "moment";
+import 'moment/locale/en-gb';
 import { Map, Marker } from 'react-leaflet';
 import { Line } from "react-chartjs-2";
 
@@ -113,6 +114,7 @@ class GatewayDetails extends Component {
 
     let lastSeenAt = "Never";
     if (this.props.lastSeenAt !== null) {
+      moment.locale('en-gb');
       lastSeenAt = moment(this.props.lastSeenAt).format("lll");
     }
 
