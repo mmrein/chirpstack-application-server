@@ -21,14 +21,15 @@ const styles = {
     height: 300,
   },
 };
-
+  
 
 class GatewayDetails extends Component {
   constructor() {
     super();
     this.state = {
-      statsUp: [],
-      statsDown: [],
+      statsUpDn: [],
+      //statsUp: [],
+      //statsDown: [],
       statusGw: []
     };
     this.loadStats = this.loadStats.bind(this);
@@ -46,29 +47,29 @@ class GatewayDetails extends Component {
     const interval = "DAY"
 
     GatewayStore.getStats(this.props.match.params.gatewayID, interval, start, end, resp => {
-      let statsDown = {
+    /*  let statsUp = {
         labels: [],
         datasets: [
           {
             label: "rx received",
-            borderColor: "rgba(33, 150, 243, 1)",
+            borderColor: "rgba(25, 136, 68, 1)",
             backgroundColor: "rgba(0, 0, 0, 0)",
             lineTension: 0,
-            pointBackgroundColor: "rgba(33, 150, 243, 1)",
+            pointBackgroundColor: "rgba(25, 136, 68, 1)",
             data: [],
           },
         ],
       }
 
-      let statsUp = {
+      let statsDown = {
         labels: [],
         datasets: [
           {
             label: "tx emitted",
-            borderColor: "rgba(33, 150, 243, 1)",
+            borderColor: "rgba(204, 52, 43, 1)",
             backgroundColor: "rgba(0, 0, 0, 0)",
             lineTension: 0,
-            pointBackgroundColor: "rgba(33, 150, 243, 1)",
+            pointBackgroundColor: "rgba(204, 52, 43, 1)",
             data: [],
           },
         ],
@@ -80,10 +81,41 @@ class GatewayDetails extends Component {
         statsUp.datasets[0].data.push(row.txPacketsEmitted);
         statsDown.datasets[0].data.push(row.rxPacketsReceivedOK);
       }
+      */
+
+    // Draw rx(green) / tx(red) frame count in one graph 
+    let statsUpDn = {
+      labels: [],
+      datasets: [
+        {
+          label: "rx received",
+          borderColor: "rgba(25, 136, 68, 1)",
+          backgroundColor: "rgba(0, 0, 0, 0)",
+          lineTension: 0,
+          pointBackgroundColor: "rgba(25, 136, 68, 1)",
+          data: [],
+        },
+        {
+          label: "tx emitted",
+          borderColor: "rgba(204, 52, 43, 1)",
+          backgroundColor: "rgba(0, 0, 0, 0)",
+          lineTension: 0,
+          pointBackgroundColor: "rgba(204, 52, 43, 1)",
+          data: [],
+        },
+      ],
+    }
+
+    for (const row of resp.result) {
+      statsUpDn.labels.push(moment(row.timestamp).format("Do"));
+      statsUpDn.datasets[0].data.push(row.rxPacketsReceivedOK);
+      statsUpDn.datasets[1].data.push(row.txPacketsEmitted); 
+    }
 
       this.setState({
-        statsUp: statsUp,
-        statsDown: statsDown,
+        //statsUp: statsUp,
+        //statsDown: statsDown,
+        statsUpDn: statsUpDn,
       });
     });
   }
@@ -116,14 +148,13 @@ class GatewayDetails extends Component {
         ],
       }
       for (const row of resp.result) {
-        statusGw.labels.push(moment(row.timestamp).format("h:mm"));
+        statusGw.labels.push(moment(row.timestamp).format("H:mm"));
         if ((row.rxPacketsReceived + row.rxPacketsReceivedOK + row.txPacketsReceived + row.txPacketsEmitted) > 0) {
           statusGw.datasets[0].data.push(1);	
         } else {
           statusGw.datasets[0].data.push(0);	
         }
-        
-		// Just a debug values so far, has to be something else
+		    // Just a debug values so far, has to be something else
       }
       this.setState({
         statusGw: statusGw
@@ -132,7 +163,7 @@ class GatewayDetails extends Component {
   }
 
   render() {
-    if (this.props.gateway === undefined || this.state.statsDown === undefined || this.state.statsUp === undefined || this.state.statusGw === undefined) {
+    if (this.props.gateway === undefined /*|| this.state.statsDown === undefined || this.state.statsUp === undefined*/ || this.state.statusGw === undefined || this.state.statsUpDn === undefined) {
       return(<div></div>);
     }
 
@@ -209,7 +240,7 @@ class GatewayDetails extends Component {
             </Map>
           </Paper>
         </Grid>
-		<Grid item xs={12}>
+        <Grid item xs={12}>
           <Card>
             <CardHeader title="Gateway status" />
             <CardContent className={this.props.classes.chart}>
@@ -217,6 +248,18 @@ class GatewayDetails extends Component {
             </CardContent>
           </Card>
         </Grid>
+        <Grid item xs={12}>
+          <Card>
+            <CardHeader title="Frames received / transmitted" />
+            <CardContent className={this.props.classes.chart}>
+              <Line height={75} options={statsOptions} data={this.state.statsUpDn} redraw />
+            </CardContent>
+          </Card>
+        </Grid>
+
+      </Grid>
+    );
+        /*
         <Grid item xs={12}>
           <Card>
             <CardHeader title="Frames received" />
@@ -233,8 +276,7 @@ class GatewayDetails extends Component {
             </CardContent>
           </Card>
         </Grid>
-      </Grid>
-    );
+        */
   }
 }
 
