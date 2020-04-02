@@ -28,8 +28,6 @@ class GatewayDetails extends Component {
     super();
     this.state = {
       statsUpDn: [],
-      //statsUp: [],
-      //statsDown: [],
       statusGw: []
     };
     this.loadStats = this.loadStats.bind(this);
@@ -85,7 +83,7 @@ class GatewayDetails extends Component {
     const end = moment().toISOString()
     const start = moment().subtract(2, "hours").toISOString()
     const interval = "MINUTE"
-    
+
     GatewayStore.getStats(this.props.match.params.gatewayID, interval, start, end, resp => {
       let statusGw = {
         labels: [],
@@ -100,7 +98,7 @@ class GatewayDetails extends Component {
           },
         ],
       }
-      
+
       for (const row of resp.result) {
         statusGw.labels.push(moment(row.timestamp).format("H:mm"));
         if ((row.rxPacketsReceived + row.rxPacketsReceivedOK + row.txPacketsReceived + row.txPacketsEmitted) > 0) {
@@ -109,6 +107,7 @@ class GatewayDetails extends Component {
           statusGw.datasets[0].data.push(0);	
         }   // Using example values
       }
+ 
       this.setState({
         statusGw: statusGw
       });
