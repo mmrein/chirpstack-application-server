@@ -501,11 +501,11 @@ func (a *ApplicationServerAPI) HandleGatewayStats(ctx context.Context, req *as.H
 	metrics := storage.MetricsRecord{
 		Time: ts,
 		Metrics: map[string]float64{
-			"rx_count":     float64(req.RxPacketsReceived),
-			"rx_ok_count":  float64(req.RxPacketsReceivedOk),
-			"tx_count":     float64(req.TxPacketsReceived),
-			"tx_ok_count":  float64(req.TxPacketsEmitted),
-			"stats_count":  float64(1),
+			"rx_count":    float64(req.RxPacketsReceived),
+			"rx_ok_count": float64(req.RxPacketsReceivedOk),
+			"tx_count":    float64(req.TxPacketsReceived),
+			"tx_ok_count": float64(req.TxPacketsEmitted),
+			"stats_count": float64(1),
 		},
 	}
 	if err := storage.SaveMetrics(ctx, fmt.Sprintf("gw:%s", gatewayID), metrics); err != nil {
