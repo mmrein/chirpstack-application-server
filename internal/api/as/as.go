@@ -480,6 +480,7 @@ func (a *ApplicationServerAPI) HandleGatewayStats(ctx context.Context, req *as.H
 			"rx_ok_count": float64(req.RxPacketsReceivedOk),
 			"tx_count":    float64(req.TxPacketsReceived),
 			"tx_ok_count": float64(req.TxPacketsEmitted),
+			"stats_count": float64(1),
 		},
 	}
 	if err := storage.SaveMetrics(ctx, fmt.Sprintf("gw:%s", gatewayID), metrics); err != nil {
