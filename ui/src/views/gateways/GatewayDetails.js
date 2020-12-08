@@ -42,10 +42,14 @@ class GatewayDetails extends Component {
   loadStats() {
     const end = moment().toISOString()
     const start = moment().subtract(30, "days").toISOString()
-    const interval = "DAY"
 
+<<<<<<< HEAD
     GatewayStore.getStats(this.props.match.params.gatewayID, interval, start, end, resp => {
       let statsUpDn = {
+=======
+    GatewayStore.getStats(this.props.match.params.gatewayID, start, end, resp => {
+      let statsDown = {
+>>>>>>> parent of 05fe360... Add interval parameter to GatewayStore.getStats
         labels: [],
         datasets: [
           {
