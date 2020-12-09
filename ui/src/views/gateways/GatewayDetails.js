@@ -101,22 +101,39 @@ class GatewayDetails extends Component {
         ],
       }
 
+      let statsCnt = {
+        labels: [],
+        datasets: [
+          {
+            label: "stats count",
+            borderColor: "rgba(33, 150, 243, 1)",
+            backgroundColor: "rgba(0, 0, 0, 0)",
+            lineTension: 0,
+            pointBackgroundColor: "rgba(33, 150, 243, 1)",
+            data: [],
+          },
+        ],
+      }
+
       for (const row of resp.result) {
         statsUp.labels.push(moment(row.timestamp).format("Do"));
         statsDown.labels.push(moment(row.timestamp).format("Do"));
+        statsCnt.labels.push(moment(row.timestamp).format("Do"));
         statsUp.datasets[0].data.push(row.txPacketsEmitted);
         statsDown.datasets[0].data.push(row.rxPacketsReceivedOK);
+        statsCnt.datasets[0].data.push(row.statCount);
       }
 
       this.setState({
         statsUp: statsUp,
         statsDown: statsDown,
+        statsCnt: statsCnt,
       });
     });
   }
 
   render() {
-    if (this.props.gateway === undefined || this.state.statsDown === undefined || this.state.statsUp === undefined) {
+    if (this.props.gateway === undefined || this.state.statsDown === undefined || this.state.statsUp === undefined || this.state.statsCnt === undefined) {
       return(<div></div>);
     }
 
@@ -163,6 +180,14 @@ class GatewayDetails extends Component {
             </Map>
           </Paper>
         </Grid>
+        <Grid item xs={12}>
+          <Card>
+            <CardHeader title="Status Messages Received" />
+            <CardContent className={this.props.classes.chart}>
+              <Line height={75} options={statsOptions} data={this.state.statsCnt} redraw />
+            </CardContent>
+          </Card>
+        </Grid>      
         <Grid item xs={12}>
           <Card>
             <CardHeader title="Frames received" />
